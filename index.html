@@ -1,18 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>WMS SCANNER</title>
+  <title>WMS VALIDASI RESI</title>
 </head>
 <body>
 
-<h2>SCAN BARCODE</h2>
+<h2>SCAN RESI</h2>
 
-<input type="text" id="barcode" placeholder="Scan di sini" autofocus 
-onkeydown="if(event.key==='Enter') scanBarang()">
+<input type="text" id="resi" placeholder="Scan resi di sini" autofocus 
+onkeydown="if(event.key==='Enter') cekResi()">
+
+<p id="hasil"></p>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
-import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
+import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyALd0AzqEr5Ewn-2-X8gSNET09zT3G6JZU",
@@ -26,19 +28,33 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-window.scanBarang = async function() {
-  const barcode = document.getElementById("barcode").value;
+window.cekResi = async function() {
+  const resi = document.getElementById("resi").value.trim();
+  const hasil = document.getElementById("hasil");
 
-  if (!barcode) return;
+  if (!resi) return;
 
-  await addDoc(collection(db, "scans"), {
-    barcode: barcode,
-    waktu: new Date()
-  });
+  const ref = doc(db, "orders", resi);
+  const snap = await getDoc(ref);
 
-  alert("Tersimpan: " + barcode);
+  if (snap.exists()) {
+    const data = snap.data();
 
-  document.getElementById("barcode").value = "";
+    hasil.innerHTML = `
+      ✅ VALID <br>
+      Nama: ${data.nama || "-"} <br>
+      Status: ${data.status || "BELUM SCAN"}
+    `;
+
+    await updateDoc(ref, {
+      status: "SUDAH SCAN"
+    });
+
+  } else {
+    hasil.innerHTML = "❌ RESI TIDAK DITEMUKAN";
+  }
+
+  document.getElementById("resi").value = "";
 };
 </script>
 
