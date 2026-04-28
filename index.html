@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>WMS SCANNER</title>
+</head>
+<body>
+
+<h2>SCAN BARCODE</h2>
+
+<input type="text" id="barcode" placeholder="Scan di sini" autofocus 
+onkeydown="if(event.key==='Enter') scanBarang()">
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
+import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyALd0AzqEr5Ewn-2-X8gSNET09zT3G6JZU",
+  authDomain: "wms-kopi.firebaseapp.com",
+  projectId: "wms-kopi",
+  storageBucket: "wms-kopi.firebasestorage.app",
+  messagingSenderId: "150458896595",
+  appId: "1:150458896595:web:0fec84915d431bdb444426"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+window.scanBarang = async function() {
+  const barcode = document.getElementById("barcode").value;
+
+  if (!barcode) return;
+
+  await addDoc(collection(db, "scans"), {
+    barcode: barcode,
+    waktu: new Date()
+  });
+
+  alert("Tersimpan: " + barcode);
+
+  document.getElementById("barcode").value = "";
+};
+</script>
+
+</body>
+</html>
